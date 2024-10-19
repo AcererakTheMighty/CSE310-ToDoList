@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List in JavaScript</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        ul li {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+        }
+        ul li.completed {
+            text-decoration: line-through;
+            color: #999;
+        }
+        input[type="text"] {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+        }
+        button {
+            padding: 8px 12px;
+            border: none;
+            background-color: #28a745;
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .remove-btn {
+            background-color: #dc3545;
+        }
+        .remove-btn:hover {
+            background-color: #c82333;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>To-Do List</h1>
+    <input type="text" id="taskInput" placeholder="Enter a new task...">
+    <button id="addTaskBtn">Add Task</button>
+    <ul id="todoList"></ul>
+</div>
+
+<script>
+// Exception handling for input validation
+class TaskError extends Error {
+    constructor(message) {
+        super(message);
+        this.name = "TaskError";
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const todoList = document.getElementById('todoList');
+    const taskInput = document.getElementById('taskInput');
+    const addTaskBtn = document.getElementById('addTaskBtn');
+
+    // Task Array
+    let tasks = [];
+
+    // Function to add a task
+    const addTask = (taskText) => {
+        try {
+            if (!taskText || taskText.trim() === '') {
+                throw new TaskError("Task cannot be empty.");
+            }
+            if (taskText.length > 100) {
+                throw new TaskError("Task text is too long.");
+            }
+            const task = {
+                id: Date.now(),
+                text: taskText,
+                completed: false
+            };
+            tasks.push(task);
+            displayTasks();
+        } catch (error) {
+            if (error instanceof TaskError) {
+                alert(error.message);
+            } else {
+                console.error("Unexpected error:", error);
+            }
+        }
+    };
+
+    // Function to remove a task
+    const removeTask = (taskId) => {
+        tasks = tasks.filter(task => task.id !== taskId);
+        displayTasks();
+    };
+
+    // Function to toggle task completion
+    const toggleTaskCompletion = (taskId) => {
+        const task = tasks.find(task => task.id === taskId);
+        if (task) {
+            task.completed = !task.completed;
+            displayTasks();
+        }
+    };
+
+    // Function to display tasks
+    const displayTasks = () => {
+        todoList.innerHTML = ''; // Clear the list
+        tasks.forEach(task => {
+            const li = document.createElement('li');
+            li.className = task.completed ? 'completed' : '';
+
+            const span = document.createElement('span');
+            span.textContent = task.text;
+            span.addEventListener('click', () => toggleTaskCompletion(task.id));
+
+            const removeBtn = document.createElement('button');
+            removeBtn.textContent = 'Remove';
+            removeBtn.className = 'remove-btn';
+            removeBtn.addEventListener('click', () => removeTask(task.id));
+
+            li.appendChild(span);
+            li.appendChild(removeBtn);
+            todoList.appendChild(li);
+        });
+    };
+
+    // Add task button click event
+    addTaskBtn.addEventListener('click', () => {
+        const taskText = taskInput.value;
+        addTask(taskText);
+        taskInput.value = ''; // Clear input after adding task
+    });
+
+    // Listen for 'Enter' key to add task
+    taskInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            const taskText = taskInput.value;
+            addTask(taskText);
+            taskInput.value = ''; // Clear input after adding task
+        }
+    });
+
+    // Pre-populated tasks for demo purposes
+    tasks = [
+        { id: 1, text: 'Buy groceries', completed: false },
+        { id: 2, text: 'Walk the dog', completed: true },
+        { id: 3, text: 'Complete homework', completed: false }
+    ];
+
+    displayTasks(); // Initial display of tasks
+});
+</script>
+
+</body>
+</html>
